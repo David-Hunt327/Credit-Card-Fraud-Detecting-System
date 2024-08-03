@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detecting System</title>
+</head>
+<body>
+    <div class="navbar">
+        <div class="title">Credit Card Fraud Detecting System</div>
+        <div class="menu">
+            <a href="home">Dashboard</a>
+            <a href="settings">Settings</a>
+            <a href="history">History</a>
+            <!-- <a id="logoutButton" class="logout" href="#">Logout</a> -->
+        </div>
+    </div>
+    <!-- <script src="/public/scripts/logout.js"></script> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Document loaded');
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                console.log('Logout button found');
+                logoutButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    console.log('Logout button clicked');
+                    localStorage.removeItem('isLoggedIn'); 
+                    console.log('isLoggedIn removed from localStorage');
+                    window.location.href = '/login';
+                    console.log('Redirecting to login page');
+                });
+            } else {
+                console.error('Logout button not found'); 
+            }
+        });
+    </script>
+</body>
+</html>

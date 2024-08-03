@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Credit Card Fraud Detecting System</title>
+    <link rel="stylesheet" href="../css/fraud-home.css" />
+    <link rel="stylesheet" href="../css/nav.css" />
+    <link rel="stylesheet" href="../css/global.css" />
+</head>
+<body class=".body-" onload="generateBankBranches();">
+    <div id="navbar-placeholder"></div>
+    <div class="dashboard">
+        <div class="header-title">
+            <h1>Dashboard</h1>
+        </div>
+        <div class="board">
+            <div class="branches" id="branches-container"></div>
+        </div>
+    </div>
+
+
+
+
+    <script>
+      if (localStorage.getItem('isLoggedIn') !== 'true') {
+          window.location.href = '/';
+      }
+    </script>
+    <script src="../scripts/navLoader.js"></script>
+    <script>
+        function generateBankBranches() {
+            const branchesContainer = document.getElementById('branches-container');
+            branchesContainer.innerHTML = ''; 
+            const allowedBranches = JSON.parse(localStorage.getItem('allowedBranches')) || [];
+
+            if (allowedBranches.length === 0) {
+                const noBanksMessage = document.createElement('div');
+                noBanksMessage.className = 'no-banks-message';
+                noBanksMessage.textContent = 'No supported banks';
+                branchesContainer.appendChild(noBanksMessage);
+            } else {
+                allowedBranches.forEach(branchName => {
+                    const branchDiv = document.createElement('div');
+                    branchDiv.className = 'branch';
+                    branchDiv.innerHTML = `
+                        <h2>${branchName}</h2>
+                        <form name="User info">
+                            <label>Card Number</label>
+                            <input type="number" placeholder="1234 5678 9012 3456 7890" required minlength="16" maxlength="16" />
+                            <label>Amount</label>
+                            <input type="number" placeholder="Withdrawal Amount" required />
+                            <label>PIN</label>
+                            <input type="password" placeholder="****" required maxlength="6" minlength="4" />
+                            <button type="button" onclick="handleWithdraw(this, '${branchName}')">Withdraw</button>
+                            <div class="message"></div>
+                        </form>
+                    `;
+                    branchesContainer.appendChild(branchDiv);
+                });
+            }
+        }
+
+        function handleWithdraw(button, branchName) {
+            const form = button.parentElement;
+            const cardNumber = form.querySelector('input[placeholder="1234 5678 9012 3456 7890"]').value;
+            const amount = form.querySelector('input[placeholder="Withdrawal Amount"]').value;
+            const pin = form.querySelector('input[type="password"]').value;
+            const messageDiv = form.querySelector('.message');
+            messageDiv.innerHTML = '';
+
+            if (!cardNumber || !amount || !pin) {
+                messageDiv.textContent = 'Please fill all fields';
+                messageDiv.className = 'message error';
+                return;
+            }
+
+            const transactionLimit = parseFloat(localStorage.getItem('transactionLimit')) || 10000;
+            const success = parseFloat(amount) <= transactionLimit;
+            const userName = generateRandomName();
+            const transactionDate = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+            const transaction = {
+                userName,
+                branchName,
+                amount,
+                transactionDate,
+                success
+            };
+
+            saveTransaction(transaction);
+
+            if (success) {
+                messageDiv.textContent = 'Success';
+                messageDiv.className = 'message success';
+            } else {
+                messageDiv.textContent = 'Account has been blacklisted';
+                messageDiv.className = 'message error';
+            }
+        }
+
+        function saveTransaction(transaction) {
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            transactions.push(transaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        function generateRandomName() {
+            const titles = ["Mr", "Mrs"];
+            const names = ["Umar", "David", "Benita", "Samuel", "Danielle", "Tester"];
+            const title = titles[Math.floor(Math.random() * titles.length)];
+            const name = names[Math.floor(Math.random() * names.length)];
+            return `${title} ${name}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Credit Card Fraud Detecting System</title>
+    <link rel="stylesheet" href="../css/History.css" />
+    <link rel="stylesheet" href="../css/nav.css" />
+    <link rel="stylesheet" href="../css/global.css" />
+    <style>
+        .no-data-message {
+            text-align: center;
+            font-size: 1em;
+            color: #4e4d4d;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body onload="loadNavbar(); loadTransactionHistory();">
+    <div id="navbar-placeholder"></div>
+    <div class="container">
+        <div class="header-title">
+            <h1>Transactions & History</h1>
+        </div>
+        <section class="transaction-history">
+            <h2>Transaction History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Bank Name</th>
+                        <th>Amount</th>
+                        <th>Transaction Date & Time</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body"></tbody>
+            </table>
+            <div id="no-transaction-message" class="no-data-message">No transaction data</div>
+        </section>
+        <section class="blocking-history">
+            <h2>Blocking History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bank Name</th>
+                        <th>Account User Name</th>
+                        <th>Date & Time</th>
+                    </tr>
+                </thead>
+                <tbody id="blocking-history-body"></tbody>
+            </table>
+            <div id="no-blocking-message" class="no-data-message">No blacklisted transactions</div>
+        </section>
+    </div>
+
+    <script>
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = '/';
+        }
+    </script>
+    <script src="../scripts/navLoader.js"></script>
+    <script>
+        function loadTransactionHistory() {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            const successfulTransactions = transactions.filter(transaction => transaction.success);
+            const blockedTransactions = transactions.filter(transaction => !transaction.success);
+
+            populateTable(successfulTransactions);
+            populateBlockingHistory(blockedTransactions);
+
+            document.getElementById('no-transaction-message').style.display = successfulTransactions.length === 0 ? 'block' : 'none';
+            document.getElementById('no-blocking-message').style.display = blockedTransactions.length === 0 ? 'block' : 'none';
+        }
+
+        function populateTable(data) {
+            const tbody = document.getElementById("data-table-body");
+            tbody.innerHTML = "";
+
+            data.forEach(transaction => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${transaction.userName}</td>
+                    <td>${transaction.branchName}</td>
+                    <td>${transaction.amount}</td>
+                    <td>${transaction.transactionDate}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function populateBlockingHistory(data) {
+            const tbody = document.getElementById("blocking-history-body");
+            tbody.innerHTML = "";
+
+            data.forEach(transaction => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${transaction.branchName}</td>
+                    <td>${transaction.userName}</td>
+                    <td>${transaction.transactionDate}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.onload = () => {
+            loadTransactionHistory();
+            loadNavbar();
+        };
+    </script>
+</body>
+</html>

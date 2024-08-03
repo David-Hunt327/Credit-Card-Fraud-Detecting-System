@@ -1,0 +1,45 @@
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+.transaction-history, .blocking-history {
+    background: #beffc3b2;
+    padding: 20px;
+    margin: 25px auto;
+    border-radius: 5px;
+}
+
+.transaction-history h2, .blocking-history h2 {
+    text-align: center;
+    color: #333;
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+table, th, td {
+    border: 3px solid #ddd;
+}
+
+th, td {
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    font-size: 14px;
+    text-align: left;
+}
+
+th {
+    background-color: #97fdad;
+    text-align: center;
+}

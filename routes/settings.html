@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="../css/settings.css">
+    <link rel="stylesheet" href="../css/nav.css" />
+    <link rel="stylesheet" href="../css/global.css" />
+    <style>
+        .no-banks-message, .no-branches-message {
+            font-size: 1em;
+            color: #4e4d4d; 
+            padding: 0;
+            margin:0;
+        }
+
+        .no-branches-message {
+            margin-top: -10px;
+        }
+    </style>
+</head>
+<body onload="loadNavbar(); loadBanks(); loadTransactionLimit();">
+    <div id="navbar-placeholder"></div>
+    <div class="header-title">
+        <h1>Settings</h1>
+    </div>
+    <div class="settings">
+        <div class="setting-item half-width">
+            <h2>Per Transaction Limit</h2>
+            <input type="text" id="transaction-limit-input" placeholder="Current limit : Unset">
+            <span class="warn">Use to set the transaction limit.</span>
+            <button onclick="updateTransactionLimit()">Update</button>
+        </div>
+        <div class="setting-item half-width">
+            <h2>Allowed Branches</h2>
+            <div class="allowed-branches">
+                <ul id="allowed-branches-list"></ul>
+                <div id="no-branches-message" class="no-branches-message">No banks selected</div>
+            </div>
+            <h3>Set Allowed Branches</h3>
+            <div class="checkbox-list" id="checkbox-list"></div>
+            <div id="no-banks-message" class="no-banks-message">Use the input to add banks</div>
+            <div class="add_new">
+                <input type="text" id="new-bank-input" placeholder="Add new bank">
+                <button onclick="addNewBank()">Add Bank</button>
+            </div>
+            <span class="warn">Use to create, delete, and update banks.</span>
+            <button onclick="deleteSelectedBanks()">Delete Selection</button>
+            <button onclick="updateAllowedBranches()">Update Selection</button>
+        </div>
+        <div class="setting-item full-width">
+            <h2>Change Status</h2>
+            <div><input type="checkbox"> Active</div>
+            <button>Submit</button>
+        </div>
+    </div>
+    <script>
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = '/';
+        }
+    </script>
+    <script src="../scripts/navLoader.js"></script>
+    <script>
+        function addNewBank() {
+            const newBankInput = document.getElementById('new-bank-input');
+            const newBankName = newBankInput.value.trim();
+            if (newBankName) {
+                const checkboxList = document.getElementById('checkbox-list');
+                const newCheckbox = document.createElement('div');
+                newCheckbox.innerHTML = `<input type="checkbox"> ${newBankName}`;
+                checkboxList.appendChild(newCheckbox);
+                newBankInput.value = '';
+
+                let banks = JSON.parse(localStorage.getItem('banks')) || [];
+                banks.push(newBankName);
+                localStorage.setItem('banks', JSON.stringify(banks));
+
+                document.getElementById('no-banks-message').style.display = 'none';
+            }
+        }
+
+        function deleteSelectedBanks() {
+            const checkboxes = document.querySelectorAll('#checkbox-list input[type="checkbox"]');
+            let banks = JSON.parse(localStorage.getItem('banks')) || [];
+            let allowedBranches = JSON.parse(localStorage.getItem('allowedBranches')) || [];
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const bankName = checkbox.parentElement.textContent.trim();
+                    banks = banks.filter(bank => bank !== bankName);
+                    allowedBranches = allowedBranches.filter(branch => branch !== bankName);
+                    checkbox.parentElement.remove();
+                }
+            });
+
+            localStorage.setItem('banks', JSON.stringify(banks));
+            localStorage.setItem('allowedBranches', JSON.stringify(allowedBranches));
+
+            const allowedBranchesList = document.getElementById('allowed-branches-list');
+            allowedBranchesList.innerHTML = '';
+            allowedBranches.forEach(branchName => {
+                const newListItem = document.createElement('li');
+                newListItem.textContent = branchName;
+                allowedBranchesList.appendChild(newListItem);
+            });
+
+            document.getElementById('no-branches-message').style.display = allowedBranches.length === 0 ? 'block' : 'none';
+        }
+
+        function updateAllowedBranches() {
+            const allowedBranchesList = document.getElementById('allowed-branches-list');
+            allowedBranchesList.innerHTML = '';
+            const checkboxes = document.querySelectorAll('#checkbox-list input[type="checkbox"]');
+            const allowedBranches = [];
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const branchName = checkbox.parentElement.textContent.trim();
+                    allowedBranches.push(branchName);
+                    const newListItem = document.createElement('li');
+                    newListItem.textContent = branchName;
+                    allowedBranchesList.appendChild(newListItem);
+                }
+            });
+            localStorage.setItem('allowedBranches', JSON.stringify(allowedBranches));
+
+            document.getElementById('no-branches-message').style.display = allowedBranches.length === 0 ? 'block' : 'none';
+        }
+
+        function loadBanks() {
+            const banks = JSON.parse(localStorage.getItem('banks')) || [];
+            const checkboxList = document.getElementById('checkbox-list');
+            checkboxList.innerHTML = '';
+            banks.forEach(bankName => {
+                const newCheckbox = document.createElement('div');
+                newCheckbox.innerHTML = `<input type="checkbox"> ${bankName}`;
+                checkboxList.appendChild(newCheckbox);
+            });
+
+            document.getElementById('no-banks-message').style.display = banks.length === 0 ? 'block' : 'none';
+
+            const allowedBranches = JSON.parse(localStorage.getItem('allowedBranches')) || [];
+            const allowedBranchesList = document.getElementById('allowed-branches-list');
+            allowedBranchesList.innerHTML = '';
+            allowedBranches.forEach(branchName => {
+                const newListItem = document.createElement('li');
+                newListItem.textContent = branchName;
+                allowedBranchesList.appendChild(newListItem);
+            });
+
+            document.getElementById('no-branches-message').style.display = allowedBranches.length === 0 ? 'block' : 'none';
+
+            const checkboxes = document.querySelectorAll('#checkbox-list input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                const branchName = checkbox.parentElement.textContent.trim();
+                checkbox.checked = allowedBranches.includes(branchName);
+            });
+        }
+
+        function updateTransactionLimit() {
+            const transactionLimitInput = document.getElementById('transaction-limit-input');
+            const transactionLimit = transactionLimitInput.value.trim();
+            if (transactionLimit) {
+                localStorage.setItem('transactionLimit', transactionLimit);
+                alert('Transaction limit updated successfully!');
+            } else {
+                alert('Please enter a valid transaction limit.');
+            }
+        }
+
+        function loadTransactionLimit() {
+            const transactionLimit = localStorage.getItem('transactionLimit');
+            const transactionLimitInput = document.getElementById('transaction-limit-input');
+            if (transactionLimit) {
+                transactionLimitInput.placeholder = `Current limit : ${transactionLimit}`;
+            }
+        }
+    </script>
+</body>
+</html>
