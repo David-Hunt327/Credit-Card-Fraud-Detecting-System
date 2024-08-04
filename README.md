@@ -1,3 +1,20 @@
+### GETTING STARTED
+To get started with the Bookshop-Management-System project, follow these steps:
+
+  1 Clone the Repository:
+
+  Clone this repository to your local machine using the following command:
+
+    git clone git@github.com:David-Hunt327/Credit-Card-Fraud-Detecting-System.git
+    
+  2 Navigate to the Project Directory:
+
+  Navigate to the project directory:
+
+    cd Credit-Card-Fraud-Detecting-System
+
+or Download manually
+
 ### SETUP
 - Unzip the file and extract to a desired location.
 - Open the file in vs code and head to the terminal.
